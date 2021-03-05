@@ -3,6 +3,7 @@ import HelloWorld from "../components/HelloWorld.vue"
 import myFriendPage from "../components/Auth/myFriendPage.vue"
 import messagePage from "../components/Auth/messagePage.vue"
 import store from "../store/index"
+import Vue from 'vue'
 const routes = [{
         path: "/start",
         component: startPage,
@@ -11,6 +12,10 @@ const routes = [{
             if (store.getters["AUTH/getAuth"] == true) {
                 next({ name: "index" })
             } else {
+                if (Vue.$cookies.get("idtoken") != "") {
+                    store.dispatch("AUTH/checkAuth", Vue.$cookies.get("idtoken"))
+
+                }
                 next()
             }
         }
@@ -18,7 +23,13 @@ const routes = [{
     {
         path: "/",
         component: HelloWorld,
-        beforeEnter: (to, from, next) => {
+        beforeEnter: async(to, from, next) => {
+            if (Vue.$cookies.get("idtoken") != "") {
+                await store.dispatch("AUTH/checkAuth", Vue.$cookies.get("idtoken"))
+
+            } else {
+                next({ name: "startPage" })
+            }
             if (store.getters["AUTH/getAuth"] == false) {
                 next({ name: "startPage" })
             } else {

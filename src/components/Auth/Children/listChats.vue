@@ -1,172 +1,180 @@
 <template>
-<div id="listchat">
+  <div id="listchat">
     <v-toolbar color="deep-purple accent-4" dark class="rounded-lg" height="50">
-        <v-fab-transition>
-            <v-toolbar-title v-show="!isSearch">
-                <v-btn icon>
-                    <v-icon color="deep-orange">
-                        mdi-comment-plus-outline
-                    </v-icon>
-                </v-btn>
+      <v-fab-transition>
+        <v-toolbar-title v-show="!isSearch">
+          <v-btn icon>
+            <v-icon color="deep-orange">
+              mdi-comment-plus-outline
+            </v-icon>
+          </v-btn>
 
-                Chats
-            </v-toolbar-title>
-        </v-fab-transition>
+          Chats
+        </v-toolbar-title>
+      </v-fab-transition>
 
-        <v-fab-transition>
-            <v-text-field v-show="isSearch" hide-details prepend-icon="mdi-account-search" single-line></v-text-field>
-        </v-fab-transition>
+      <v-fab-transition>
+        <v-text-field
+          v-show="isSearch"
+          hide-details
+          prepend-icon="mdi-account-search"
+          single-line
+        ></v-text-field>
+      </v-fab-transition>
 
-        <v-spacer></v-spacer>
+      <v-spacer></v-spacer>
 
-        <v-btn icon @click="isSearch = !isSearch" :color="isSearch == true ? 'red' : 'none'">
-            <v-icon>{{ actionToolbar }}</v-icon>
-        </v-btn>
+      <v-btn
+        icon
+        @click="isSearch = !isSearch"
+        :color="isSearch == true ? 'red' : 'none'"
+      >
+        <v-icon>{{ actionToolbar }}</v-icon>
+      </v-btn>
     </v-toolbar>
 
-    <v-list subheader class="pl-3">
-        <v-subheader>Recent chat</v-subheader>
-        <v-virtual-scroll :items="recent" :item-height="70" height="300" class="scrollBar">
-            <template v-slot:default="{ item }">
-                <v-list-item>
-                    <v-list-item-avatar>
-                        <v-img :alt="`${item.title} avatar`" :src="item.avatar"></v-img>
-                    </v-list-item-avatar>
+    <v-list class="pl-3" three-line rounded>
+      <v-virtual-scroll
+        :items="listChat"
+        :item-height="80"
+        :height="innerHeight - 90"
+        class="scrollBar"
+      >
+        <template v-slot:default="{ item, index }">
+          <v-list-item
+            :key="index"
+            link
+            @click="btnChat(item.idchat, item.title)"
+            @change="changeTarget(index)"
+            :class="{ 'bg-light': index == selectedItem }"
+          >
+            <v-list-item-avatar>
+              <v-img :src="getPhotoURL(item.title)"></v-img>
+            </v-list-item-avatar>
 
-                    <v-list-item-content>
-                        <v-list-item-title v-text="item.title"></v-list-item-title>ssd
-                    </v-list-item-content>
-                </v-list-item>
-            </template>
-        </v-virtual-scroll>
+            <v-list-item-content>
+              <v-list-item-title>{{ item.title }}</v-list-item-title>
+
+              <v-list-item-subtitle
+                :class="{
+                  'text-danger': item.state == 0 && item.owner != getEmail,
+                }"
+                >{{ checkType(item.type, item.latestMes) }}
+              </v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </template>
+      </v-virtual-scroll>
     </v-list>
-
-    <v-divider></v-divider>
-
-    <v-list subheader class="pl-3">
-        <v-subheader>Previous chats</v-subheader>
-        <v-virtual-scroll :items="previous" :item-height="50" height="150" class="scrollBar">
-            <template v-slot:default="{ item }">
-                <v-list-item>
-                    <v-list-item-avatar>
-                        <v-img :alt="`${item.title} avatar`" :src="item.avatar"></v-img>
-                    </v-list-item-avatar>
-
-                    <v-list-item-content>
-                        <v-list-item-title v-text="item.title"></v-list-item-title>ssd
-                    </v-list-item-content>
-                </v-list-item>
-            </template>
-        </v-virtual-scroll>
-    </v-list>
-</div>
+  </div>
 </template>
 
 <script>
+import { fb } from "../../../apis/firebase/config";
+import { mapGetters } from "vuex";
 export default {
-    data: () => ({
-        heightDevice: window.innerHeight,
-        isSearch: false,
-        recent: [{
-                active: true,
-                avatar: "https://cdn.vuetifyjs.com/images/lists/1.jpg",
-                title: "Jason Oner",
-            },
-            {
-                active: true,
-                avatar: "https://cdn.vuetifyjs.com/images/lists/2.jpg",
-                title: "Mike Carlson",
-            },
-            {
-                avatar: "https://cdn.vuetifyjs.com/images/lists/3.jpg",
-                title: "Cindy Baker",
-            },
-            {
-                avatar: "https://cdn.vuetifyjs.com/images/lists/4.jpg",
-                title: "Ali Connors",
-            },
-            {
-                avatar: "https://cdn.vuetifyjs.com/images/lists/4.jpg",
-                title: "Ali Connors",
-            },
-            {
-                avatar: "https://cdn.vuetifyjs.com/images/lists/4.jpg",
-                title: "Ali Connors",
-            },
-            {
-                avatar: "https://cdn.vuetifyjs.com/images/lists/4.jpg",
-                title: "Ali Connors",
-            },
-            {
-                avatar: "https://cdn.vuetifyjs.com/images/lists/4.jpg",
-                title: "Ali Connors",
-            },
-            {
-                avatar: "https://cdn.vuetifyjs.com/images/lists/4.jpg",
-                title: "Ali Connors",
-            },
-            {
-                avatar: "https://cdn.vuetifyjs.com/images/lists/4.jpg",
-                title: "Ali Connors",
-            },
-            {
-                avatar: "https://cdn.vuetifyjs.com/images/lists/4.jpg",
-                title: "Ali Connors",
-            },
-        ],
-        previous: [{
-                title: "Travis Howard",
-                avatar: "https://cdn.vuetifyjs.com/images/lists/5.jpg",
-            },
-            {
-                title: "Travis Howard",
-                avatar: "https://cdn.vuetifyjs.com/images/lists/5.jpg",
-            },
-            {
-                title: "Travis Howard",
-                avatar: "https://cdn.vuetifyjs.com/images/lists/5.jpg",
-            },
-            {
-                title: "Travis Howard",
-                avatar: "https://cdn.vuetifyjs.com/images/lists/5.jpg",
-            },
-            {
-                title: "Travis Howard",
-                avatar: "https://cdn.vuetifyjs.com/images/lists/5.jpg",
-            },
-            {
-                title: "Travis Howard",
-                avatar: "https://cdn.vuetifyjs.com/images/lists/5.jpg",
-            },
-            {
-                title: "Travis Howard",
-                avatar: "https://cdn.vuetifyjs.com/images/lists/5.jpg",
-            },
-            {
-                title: "Travis Howard",
-                avatar: "https://cdn.vuetifyjs.com/images/lists/5.jpg",
-            },
-            {
-                title: "Travis Howard",
-                avatar: "https://cdn.vuetifyjs.com/images/lists/5.jpg",
-            },
-        ],
-    }),
-    computed: {
-        actionToolbar() {
-            return this.isSearch == true ? "mdi-close" : "mdi-magnify";
-        },
+  beforeMount() {
+    if (this.getAllUsers.length == 0) {
+      this.$store.dispatch("SOCIAL/fetchAllUser", this.getIdToken);
+    }
+    if (this.getMyFriend.length == 0) {
+      this.$store.dispatch("SOCIAL/fetchAllFriend", this.getEmail);
+    }
+  },
+  methods: {
+    checkType(type, content) {
+      if (type == "text") {
+        return content;
+      } else if (type == "img") {
+        return "Sent a picture";
+      } else if (type == "video") {
+        return "Sent a video";
+      }
+      return content;
     },
+    getPhotoURL(email) {
+      for (let i = 0; i < this.getAllUsers.length; i++) {
+        if (
+          this.getAllUsers[i].photoURL != null &&
+          this.getAllUsers[i].email == email
+        ) {
+          return this.getAllUsers[i].photoURL;
+        }
+      }
+      return this.getDefaultPhotoURL;
+    },
+    changeTarget(event) {
+      this.selectedItem = event;
+    },
+    btnChat(id, emailTarget) {
+      this.$emit("changeIdChat", id);
+
+      this.$store.commit("SOCIAL/setEmailTarget", emailTarget);
+    },
+  },
+  async created() {
+    await fb
+      .collection("roomchat")
+      .where("member", "array-contains", this.getEmail)
+      .onSnapshot({ includeMetadataChanges: true }, (querySnapshot) => {
+        this.listChat = [];
+        querySnapshot.docs.forEach((doc) => {
+          let title = "";
+          doc.data().member.every((ele) => {
+            if (ele != this.getEmail) {
+              title = ele;
+              return false;
+            }
+            return true;
+          });
+          if (doc.data().messages.length != 0) {
+            const chat = {
+              idchat: doc.id,
+              title,
+              latestMes: doc.data().messages[doc.data().messages.length - 1]
+                .content,
+              state: doc.data().messages[doc.data().messages.length - 1].state,
+              owner: doc.data().messages[doc.data().messages.length - 1].owner,
+              type: doc.data().messages[doc.data().messages.length - 1].type,
+            };
+            this.listChat.push(chat);
+          }
+        });
+      });
+  },
+  props: {
+    innerHeight: Number,
+  },
+
+  data: () => ({
+    isSearch: false,
+    listChat: [],
+    selectedItem: null,
+    targetIdChat: "",
+  }),
+
+  computed: {
+    ...mapGetters("AUTH", [
+      "getIdToken",
+      "getEmail",
+      "getDisplayName",
+      "getDefaultPhotoURL",
+    ]),
+    ...mapGetters("SOCIAL", ["getAllUsers", "getMyFriend"]),
+    actionToolbar() {
+      return this.isSearch == true ? "mdi-close" : "mdi-magnify";
+    },
+  },
 };
 </script>
 
 <style scoped>
 .scrollBar::-webkit-scrollbar {
-    display: none;
+  display: none;
 }
 
 /* Hide scrollbar for IE and Edge */
 .scrollBar {
-    -ms-overflow-style: none;
+  -ms-overflow-style: none;
 }
 </style>

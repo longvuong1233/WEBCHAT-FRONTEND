@@ -27,6 +27,20 @@ const signup = async(credential) => {
     }
 }
 
+const checkAuth = async(token) => {
+    try {
+        let fetch = await axios.post("/start/checkauth", {}, {
+            headers: {
+                Authorization: 'Bearer ' + token,
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+
+        return { result: true, ...fetch.data }
+    } catch (error) {
+        return { result: false, ...error.response }
+    }
+}
 const logout = async() => {
     try {
         const result = await axios.post("/start/logout")
@@ -38,14 +52,74 @@ const logout = async() => {
 
 }
 
-const verifyEmail = async() => {
+const verifyEmail = async(token) => {
     try {
-        const result = await axios.post("/start/verifyemail")
-        console.log(result, "a")
+
+        const result = await axios.post("/start/verifyemail", {}, {
+            headers: {
+                Authorization: 'Bearer ' + token
+            }
+        })
+
         return {...result }
     } catch (error) {
         return { result: false, ...error.response }
     }
 }
 
-export default { signin, signup, logout, verifyEmail }
+const forgotpassword = async(email) => {
+    try {
+        const result = await axios.post("/start/forgotpassword", { email })
+        return {...result }
+    } catch (err) {
+        return { result: false, ...err.response }
+    }
+}
+
+const resetpassword = async(token) => {
+    try {
+        const result = await axios.post("/start/resetpassword", { token })
+        return {...result }
+    } catch (err) {
+        return { result: false, ...err.response }
+    }
+}
+
+const changePassword = async(email, newPassword) => {
+    try {
+        const result = await axios.post("/start/changePassword", { email, newPassword })
+        return {...result }
+    } catch (err) {
+        return { result: false, ...err.response }
+    }
+}
+
+const getAllUsers = async(token) => {
+    try {
+
+        const result = await axios.get("/start/allusers", {
+            headers: {
+                Authorization: 'Bearer ' + token
+            }
+        })
+        return {...result }
+    } catch (err) {
+        return { result: false, ...err.response }
+    }
+}
+
+const setAvatar = async(token, url) => {
+    try {
+        const result = await axios.post("/start/setavatar", { url }, {
+            headers: {
+                Authorization: 'Bearer ' + token
+            }
+        })
+        return {...result }
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+
+export default { signin, signup, logout, verifyEmail, forgotpassword, resetpassword, changePassword, getAllUsers, checkAuth, setAvatar }
