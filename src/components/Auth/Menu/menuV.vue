@@ -165,7 +165,7 @@ import { fb } from "../../../apis/firebase/config";
 
 export default {
   created() {
-    fb.collection("roomchat").onSnapshot((querySnapshot) => {
+    fb.collection("roomchat").where("member", "array-contains", this.getEmail).onSnapshot((querySnapshot) => {
       this.countMesNS = 0;
       querySnapshot.docs.forEach((doc) => {
         if (
